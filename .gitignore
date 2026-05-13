@@ -1,0 +1,9 @@
+node_modules/
+.uploads/
+data/*.db
+data/*.db-journal
+.codebuddy/
+.workbuddy/
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>小学生每日练习</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ===== 首页 ===== -->
+  <div id="page-home" class="page active">
+    <div class="page-inner">
+      <div class="app-logo">📚</div>
+      <h1 class="app-title">小学生每日练习</h1>
+      <p class="app-subtitle">新课标语数外 · 智能听写</p>
+      <div class="home-buttons">
+        <button class="btn btn-primary btn-large" id="btn-start">开始听写</button>
+        <div class="home-secondary">
+          <button class="btn btn-secondary" id="btn-vocab-manage">词库管理</button>
+          <button class="btn btn-secondary" id="btn-wronglist">错题本</button>
+        </div>
+        <button class="btn btn-secondary" id="btn-history">历史记录</button>
+      </div>
+      <p class="home-footer">专业听写 · 高效学习</p>
+    </div>
+  </div>
+
+  <!-- ===== 设置页 ===== -->
+  <div id="page-settings" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-settings-back">← 返回</button>
+        <h2>每日练习</h2>
+        <select id="global-grade" class="grade-select-header">
+          <option value="grade2_semester1">二年级上册</option>
+          <option value="grade2_semester2">二年级下册</option>
+        </select>
+      </div>
+
+      <!-- 语文选择 -->
+      <div class="settings-step">
+        <h3>📚 语文听写</h3>
+        <div class="vocab-section-label">📖 课本词库</div>
+        <div id="chinese-content-list" class="unit-list compact-list"></div>
+        <div class="vocab-section-label">✏️ 自定义词库</div>
+        <div id="chinese-custom-list" class="unit-list compact-list"></div>
+      </div>
+
+      <!-- 英语选择 -->
+      <div class="settings-step">
+        <h3>📖 英语听写</h3>
+        <div class="vocab-section-label">📖 课本词库</div>
+        <div id="english-content-list" class="unit-list compact-list"></div>
+        <div class="vocab-section-label">✏️ 自定义词库</div>
+        <div id="english-custom-list" class="unit-list compact-list"></div>
+      </div>
+
+      <!-- 数学选择 -->
+      <div class="settings-step">
+        <h3>🔢 数学练习</h3>
+        <div id="math-content-list" class="unit-list compact-list"></div>
+      </div>
+
+      <!-- 播放设置 -->
+      <div class="settings-step">
+        <h3>练习设置</h3>
+        <div class="setting-row">
+          <label for="set-repeat">每词播放次数</label>
+          <select id="set-repeat">
+            <option value="1">1次</option>
+            <option value="2">2次</option>
+            <option value="3" selected>3次</option>
+            <option value="4">4次</option>
+            <option value="5">5次</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label for="set-interval">词语间隔</label>
+          <select id="set-interval">
+            <option value="2">2秒</option>
+            <option value="3" selected>3秒</option>
+            <option value="5">5秒</option>
+            <option value="8">8秒</option>
+          </select>
+        </div>
+        <div class="setting-summary" id="setting-summary">请选择练习内容</div>
+        <button class="btn btn-secondary" id="btn-preview">预览练习纸</button>
+        <button class="btn btn-primary btn-large" id="btn-start-dictation">开始听写</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 预览页 ===== -->
+  <div id="page-preview" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-preview-back">← 返回设置</button>
+        <h2>练习纸预览</h2>
+        <button class="btn btn-primary btn-small" id="btn-print">打印</button>
+      </div>
+      <div class="preview-scaler" id="preview-scaler">
+        <div id="preview-content" class="preview-paper"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 听写进行页 ===== -->
+  <div id="page-dictation" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <span></span>
+        <h2>听写中</h2>
+        <span id="dictation-progress" class="progress-text">1 / 10</span>
+      </div>
+
+      <div class="progress-bar-container">
+        <div id="dictation-progress-bar" class="progress-bar"></div>
+      </div>
+
+      <div class="dictation-main">
+        <div id="dictation-word" class="dictation-word">正在播放第 1 题</div>
+        <div id="timer-display" class="timer-display"></div>
+      </div>
+
+      <div class="dictation-extras">
+        <button class="btn btn-small btn-secondary" id="btn-replay">重播</button>
+        <button class="btn btn-small btn-secondary" id="btn-dictation-pause">暂停</button>
+      </div>
+
+      <div class="dictation-stop-area">
+        <button class="btn btn-stop" id="btn-dictation-stop">结束听写</button>
+      </div>
+
+      <!-- 二次确认弹窗 -->
+      <div id="stop-confirm-modal" class="modal-overlay" style="display:none">
+        <div class="modal-card">
+          <div class="modal-title">确认结束听写？</div>
+          <div class="modal-desc">结束后可以查看答案和打印练习纸</div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" id="btn-stop-cancel">继续听写</button>
+            <button class="btn btn-primary" id="btn-stop-confirm">确认结束</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 结果页 ===== -->
+  <div id="page-result" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <h2>听写结果</h2>
+      </div>
+
+      <div class="result-complete-area">
+        <div id="result-info" class="result-info">听写播报完成，共 0 个词语</div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-primary" id="btn-view-answer">查看答案</button>
+        <button class="btn btn-secondary" id="btn-result-retry">再听一次</button>
+        <button class="btn btn-secondary" id="btn-result-home">返回首页</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 答案页 ===== -->
+  <div id="page-answer" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-answer-back">← 返回</button>
+        <h2>听写答案</h2>
+        <button class="btn btn-primary btn-small" id="btn-answer-print">打印答案</button>
+      </div>
+      <div class="preview-scaler" id="answer-scaler">
+        <div id="answer-content" class="preview-paper"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 错题本页 ===== -->
+  <div id="page-wronglist" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-wronglist-back">← 返回</button>
+        <h2>错题本</h2>
+      </div>
+      <div class="wronglist-stats" id="wronglist-stats">共0题 | 已掌握0题 | 待复习0题</div>
+      <div class="wronglist-actions-bar">
+        <button class="btn btn-primary" id="btn-wronglist-review">开始复习</button>
+        <button class="btn btn-secondary" id="btn-wronglist-shuffle">随机复习</button>
+        <button class="btn btn-secondary" id="btn-wronglist-clear">清空</button>
+      </div>
+      <div id="wronglist-content"></div>
+    </div>
+  </div>
+
+  <!-- ===== 错题复习结果页 ===== -->
+  <div id="page-wronglist-result" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <h2>错题复习结果</h2>
+      </div>
+      <div id="wronglist-result-content"></div>
+      <div class="wronglist-result-actions">
+        <p>这些错题是否已经掌握？</p>
+        <button class="btn btn-primary" id="btn-wronglist-mastered">全部已掌握</button>
+        <button class="btn btn-secondary" id="btn-wronglist-partial">部分掌握</button>
+        <button class="btn btn-secondary" id="btn-wronglist-continue">还需练习</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 历史记录页 ===== -->
+  <div id="page-history" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-history-back">← 返回</button>
+        <h2>历史记录</h2>
+      </div>
+      <div id="history-content"></div>
+    </div>
+  </div>
+
+  <!-- ===== 词库管理页 ===== -->
+  <div id="page-vocab-manage" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-vocab-manage-back">← 返回</button>
+        <h2>词库管理</h2>
+        <button class="btn btn-primary btn-small" id="btn-vocab-create">+ 新建</button>
+      </div>
+      <div class="vocab-filter-tabs">
+        <button class="btn-vocab-filter active" data-filter="all">全部</button>
+        <button class="btn-vocab-filter" data-filter="chinese">语文</button>
+        <button class="btn-vocab-filter" data-filter="english">英语</button>
+        <button class="btn-vocab-filter" data-filter="math">数学</button>
+      </div>
+      <div id="vocab-manage-list"></div>
+    </div>
+  </div>
+
+  <!-- ===== 词库编辑页 ===== -->
+  <div id="page-vocab-edit" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-vocab-edit-back">← 返回</button>
+        <h2 id="vocab-edit-title">新建词库</h2>
+        <button class="btn btn-primary btn-small" id="btn-vocab-save">保存</button>
+      </div>
+
+      <div class="vocab-edit-form">
+        <div class="setting-row">
+          <label for="vocab-subject">学科</label>
+          <select id="vocab-subject">
+            <option value="chinese">语文</option>
+            <option value="english">英语</option>
+            <option value="math">数学</option>
+          </select>
+        </div>
+        <div class="setting-row" id="vocab-type-row">
+          <label for="vocab-type">类型</label>
+          <select id="vocab-type">
+            <!-- 动态填充，由JS根据学科切换 -->
+          </select>
+        </div>
+        <div class="setting-row">
+          <label for="vocab-grade">年级学期</label>
+          <select id="vocab-grade">
+            <option value="grade2_semester1">二年级上册</option>
+            <option value="grade2_semester2">二年级下册</option>
+            <option value="grade3_semester1">三年级上册</option>
+            <option value="grade3_semester2">三年级下册</option>
+            <option value="grade4_semester1">四年级上册</option>
+            <option value="grade4_semester2">四年级下册</option>
+            <option value="grade5_semester1">五年级上册</option>
+            <option value="grade5_semester2">五年级下册</option>
+            <option value="grade6_semester1">六年级上册</option>
+            <option value="grade6_semester2">六年级下册</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label for="vocab-name">课文名称</label>
+          <input type="text" id="vocab-name" placeholder="如：第1课 小蝌蚪找妈妈" class="vocab-input">
+        </div>
+      </div>
+
+      <!-- 数学知识点配置区（仅数学+知识点类型时显示） -->
+      <div id="math-knowledge-section" class="math-knowledge-section" style="display:none;">
+        <h3>知识点配置</h3>
+        <div id="math-knowledge-list" class="math-knowledge-list"></div>
+        <button class="btn btn-small btn-secondary" id="btn-add-knowledge">+ 添加知识点</button>
+        <div class="math-knowledge-preview">
+          <h4>预览生成题目</h4>
+          <div id="math-knowledge-preview" class="math-preview-words"></div>
+          <button class="btn btn-small btn-secondary" id="btn-preview-knowledge">生成预览</button>
+        </div>
+      </div>
+
+      <!-- 古诗词专用输入区（仅语文+古诗词类型时显示） -->
+      <div id="poem-input-section" class="poem-input-section" style="display:none;">
+        <h3>古诗词信息</h3>
+        <div class="poem-fields">
+          <div class="setting-row">
+            <label for="poem-title">标题</label>
+            <input type="text" id="poem-title" placeholder="如：静夜思" class="vocab-input">
+          </div>
+          <div class="setting-row">
+            <label for="poem-author">作者</label>
+            <input type="text" id="poem-author" placeholder="如：李白" class="vocab-input">
+          </div>
+          <div class="setting-row">
+            <label for="poem-content">正文</label>
+            <textarea id="poem-content" class="vocab-import-text" rows="6" placeholder="床前明月光，&#10;疑是地上霜。&#10;举头望明月，&#10;低头思故乡。"></textarea>
+          </div>
+          <button class="btn btn-secondary" id="btn-add-poem">添加古诗词</button>
+        </div>
+      </div>
+
+      <div class="vocab-words-section" id="vocab-words-section">
+        <h3>内容列表 <span id="vocab-word-count" class="vocab-word-count"></span></h3>
+        <div id="vocab-word-list" class="vocab-word-list"></div>
+      </div>
+
+      <div class="vocab-import-section" id="vocab-import-section">
+        <h3>批量导入</h3>
+        <p class="vocab-import-hint" id="vocab-import-hint">每行一词，格式：词语 拼音（拼音可选）</p>
+        <textarea id="vocab-import-text" class="vocab-import-text" rows="5" placeholder="池塘 chí táng&#10;眼睛 yǎn jing"></textarea>
+        <button class="btn btn-secondary" id="btn-vocab-import">导入</button>
+        <button class="btn btn-small btn-secondary" id="btn-vocab-add-word">+ 添加词语</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 后台管理页 ===== -->
+  <div id="page-admin" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-admin-back">← 返回</button>
+        <h2>后台管理</h2>
+      </div>
+
+      <!-- 学期选择 -->
+      <div class="settings-step">
+        <div class="setting-row">
+          <label for="admin-grade">管理学期</label>
+          <select id="admin-grade">
+            <option value="grade2_semester1">二年级上册</option>
+            <option value="grade2_semester2">二年级下册</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 语文基础词库管理 -->
+      <div class="settings-step">
+        <h3>📚 语文基础词库</h3>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="btn-admin-add-lesson">+ 添加课文</button>
+          <button class="btn btn-secondary" id="btn-admin-import">批量导入</button>
+        </div>
+        <div id="admin-chinese-lessons" class="admin-lesson-list"></div>
+      </div>
+
+      <!-- 英语基础词库管理 -->
+      <div class="settings-step">
+        <h3>📖 英语基础词库</h3>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="btn-admin-add-english">+ 添加单元</button>
+        </div>
+        <div id="admin-english-lessons" class="admin-lesson-list"></div>
+      </div>
+
+      <!-- 数学基础词库管理 -->
+      <div class="settings-step">
+        <h3>🔢 数学基础词库</h3>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="btn-admin-add-math">+ 添加知识点</button>
+        </div>
+        <div id="admin-math-lessons" class="admin-lesson-list"></div>
+      </div>
+
+      <!-- 数据管理 -->
+      <div class="settings-step">
+        <h3>💾 数据管理</h3>
+        <div class="admin-actions">
+          <button class="btn btn-secondary" id="btn-admin-export">导出词库</button>
+          <button class="btn btn-secondary" id="btn-admin-import-data">导入词库</button>
+          <button class="btn btn-danger" id="btn-admin-reset">重置基础词库</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 后台课文编辑页 ===== -->
+  <div id="page-admin-lesson-edit" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-admin-lesson-back">← 返回</button>
+        <h2 id="admin-lesson-title">编辑课文</h2>
+      </div>
+
+      <div class="settings-step">
+        <div class="setting-row">
+          <label for="admin-lesson-name">课文名称</label>
+          <input type="text" id="admin-lesson-name" class="vocab-input" placeholder="如：第1课 小蝌蚪找妈妈">
+        </div>
+        <div class="setting-row">
+          <label for="admin-lesson-type">词语类型</label>
+          <select id="admin-lesson-type">
+            <option value="word">普通词语</option>
+            <option value="poem">古诗词</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-step">
+        <h3>词语列表 <span class="hint" style="font-weight:normal;font-size:13px">（输入词语后按回车，拼音自动生成）</span></h3>
+        <div class="admin-word-input-row">
+          <input type="text" id="admin-word-input" class="vocab-input" placeholder="输入词语，按回车添加" style="flex:1">
+          <button class="btn btn-primary btn-small" id="btn-admin-add-word">添加</button>
+        </div>
+        <div id="admin-word-list" class="admin-word-list"></div>
+        <p class="hint" id="admin-word-count">已添加 0 个词语</p>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn btn-primary" id="btn-admin-save-lesson">保存课文</button>
+        <button class="btn btn-danger" id="btn-admin-delete-lesson">删除课文</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 后台数学知识点编辑页 ===== -->
+  <div id="page-admin-math-edit" class="page">
+    <div class="page-inner">
+      <div class="page-header">
+        <button class="btn-back" id="btn-admin-math-back">← 返回</button>
+        <h2 id="admin-math-title">编辑知识点</h2>
+      </div>
+
+      <div class="settings-step">
+        <div class="setting-row">
+          <label for="admin-math-name">知识点名称</label>
+          <input type="text" id="admin-math-name" class="vocab-input" placeholder="如：加法练习">
+        </div>
+      </div>
+
+      <div class="settings-step">
+        <h3>知识点配置</h3>
+        <div class="math-knowledge-config">
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="addition_1digit"> 加法（1位数）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="addition_1digit">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="addition_2digit_no_carry"> 加法（2位数不进位）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="addition_2digit_no_carry">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="addition_2digit_carry"> 加法（2位数进位）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="addition_2digit_carry">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="subtraction_1digit"> 减法（1位数）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="subtraction_1digit">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="subtraction_2digit_no_borrow"> 减法（2位数不退位）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="subtraction_2digit_no_borrow">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="subtraction_2digit_borrow"> 减法（2位数退位）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="subtraction_2digit_borrow">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="multiplication_99"> 乘法（1-9）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="multiplication_99">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="division_simple"> 除法（简单）</label>
+            <input type="number" class="knowledge-count" value="5" min="1" max="20" data-type="division_simple">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="word_problem_addition"> 应用题（加法）</label>
+            <input type="number" class="knowledge-count" value="3" min="1" max="10" data-type="word_problem_addition">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="word_problem_subtraction"> 应用题（减法）</label>
+            <input type="number" class="knowledge-count" value="3" min="1" max="10" data-type="word_problem_subtraction">
+          </div>
+          <div class="knowledge-option">
+            <label><input type="checkbox" class="knowledge-checkbox" value="word_problem_multiplication"> 应用题（乘法）</label>
+            <input type="number" class="knowledge-count" value="3" min="1" max="10" data-type="word_problem_multiplication">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-step">
+        <h3>预览生成题目</h3>
+        <div id="admin-math-preview" class="math-preview-list"></div>
+        <button class="btn btn-secondary" id="btn-admin-math-preview">生成预览</button>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn btn-primary" id="btn-admin-save-math">保存知识点</button>
+        <button class="btn btn-danger" id="btn-admin-delete-math">删除知识点</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本加载顺序很重要 -->
+  <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.28.1/dist/index.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/math-generator.js"></script>
+  <script src="js/tts.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

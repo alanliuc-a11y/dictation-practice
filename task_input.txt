@@ -1,0 +1,45 @@
+# 开发任务：小学生听写练习系统 - 第一阶段
+
+## 项目路径
+`c:\Users\Administrator\Desktop\听写练习系统`
+
+## 参考文档
+请阅读当前目录下的 `SPEC.md` 和 `TASK.md`，按照其中的要求完成开发。
+
+## 当前状态
+- `index.html` 已创建
+- `js/data.js`、`js/tts.js`、`js/timer.js`、`js/wronglist.js`、`js/history.js`、`js/app.js` 已创建
+- **`css/style.css` 缺失，需要创建**
+
+## 开发任务
+
+### 1. 创建 `css/style.css`（最紧急）
+根据 SPEC.md 中的 UI 设计要求和 index.html 中的元素结构，创建完整的样式文件。要求：
+- 简洁亲子风格，主色调柔和蓝色 (#4A90D9)
+- 大按钮、高对比度，适合手机/平板使用
+- 响应式布局（移动端优先）
+- 页面切换：`.page` 默认隐藏，`.page.active` 显示
+- 包含所有页面样式：首页、设置页、听写进行页、结果页、错题本页
+- 进度条样式
+- 大尺寸操作按钮（正确/错误按钮要特别大，方便家长点击）
+- 统计数字显示
+- 间距和字体要适合在嘈杂环境中观看
+
+### 2. 检查并补全所有 JS 模块
+确保以下模块功能完整，如有缺失或错误请修复：
+- `js/tts.js`：语音播放引擎（Web Speech API），支持 speak/stop/pause/resume
+- `js/timer.js`：时间控制器，支持开始/暂停/重置，倒计时显示
+- `js/data.js`：词库数据，至少包含第一单元到第三单元的词语（含拼音）
+- `js/wronglist.js`：错题本管理（localStorage），支持增删查清
+- `js/history.js`：历史记录（localStorage），支持添加和清空
+- `js/app.js`：完整听写流程（首页→设置页→听写页→结果页→错题本页）
+
+### 3. 确保 index.html 引用了所有必要的文件
+检查 script 和 stylesheet 引用是否正确。
+
+## 测试
+完成后，在浏览器中打开 `index.html`，测试至少5个词语的完整听写流程，确认：
+- 语音能正常播放
+- 计时器正常工作
+- 错误词语被记录到错题本
+- 结果页正常显示

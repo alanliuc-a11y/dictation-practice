@@ -2,6 +2,7 @@ node_modules/
 .uploads/
 data/*.db
 data/*.db-journal
+config.json
 .codebuddy/
 .workbuddy/
 *.log

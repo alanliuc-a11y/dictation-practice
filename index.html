@@ -92,16 +92,15 @@
 
   <!-- ===== 预览页 ===== -->
   <div id="page-preview" class="page">
-    <div class="page-inner">
-      <div class="page-header">
-        <button class="btn-back" id="btn-preview-back">← 返回设置</button>
-        <h2>练习纸预览</h2>
-        <button class="btn btn-primary btn-small" id="btn-print">打印</button>
-      </div>
-      <div class="preview-scaler" id="preview-scaler">
-        <div id="preview-content" class="preview-paper"></div>
-      </div>
+    <div class="page-header">
+      <button class="btn-back" id="btn-preview-back">← 返回设置</button>
+      <h2>练习纸预览</h2>
+      <button class="btn btn-primary btn-small" id="btn-print">打印</button>
     </div>
+    <div class="preview-pager" id="preview-pager">
+      <!-- JS动态生成多张A4纸 -->
+    </div>
+    <div class="preview-dots" id="preview-dots"></div>
   </div>
 
   <!-- ===== 听写进行页 ===== -->

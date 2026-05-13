@@ -1394,24 +1394,65 @@ body {
 }
 
 /* ========== 练习纸排版 ========== */
-/* A4纸容器 */
-.preview-scaler {
-  width: 100%;
-  overflow: hidden;
+/* 预览页：页眉固定，下方水平滑动翻页 */
+#page-preview {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-.preview-paper {
+#page-preview .page-header {
+  flex-shrink: 0;
+}
+
+/* 水平滑动翻页容器 */
+.preview-pager {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  gap: 12px;
+  padding: 8px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* 每张A4纸 */
+.preview-page {
+  flex-shrink: 0;
   width: 19.5cm;
   height: 27cm;
-  padding: 0.5cm 0;
   background: white;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  margin: 0 auto;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   box-sizing: border-box;
-  transform-origin: top left;
+  padding: 0.8cm 1cm;
   overflow: hidden;
+  position: relative;
+  scroll-snap-align: center;
+  transform-origin: top left;
+}
+
+/* 翻页指示器 */
+.preview-dots {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 12px;
+}
+
+.preview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: background 0.2s;
+}
+
+.preview-dot.active {
+  background: #333;
 }
 
 /* 练习纸标题 */
@@ -1419,34 +1460,34 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
   border-bottom: 2px solid #333;
 }
 
 .preview-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #333;
   letter-spacing: 4px;
 }
 
 .preview-date {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
 }
 
 /* 分区 */
 .practice-section {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 10px;
-  padding: 4px 0;
+  margin-bottom: 6px;
+  padding-bottom: 3px;
   border-bottom: 1px dashed #ccc;
 }
 

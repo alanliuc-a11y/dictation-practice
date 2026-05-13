@@ -461,8 +461,9 @@ const App = (() => {
   // ========== 预览页 ==========
 
   const renderPreview = async () => {
-    const container = $('preview-content');
-    if (!container) return;
+    const pager = $('preview-pager');
+    const dotsContainer = $('preview-dots');
+    if (!pager) return;
 
     // 收集三段式内容
     const chineseWords = await collectWordsBySubject('chinese', state.selectedChinese);
@@ -472,83 +473,149 @@ const App = (() => {
     // 合并所有词语用于听写播报
     state.dictationWords = [...chineseWords, ...englishWords];
 
+    if (chineseWords.length === 0 && englishWords.length === 0 && mathWords.length === 0) {
+      pager.innerHTML = '<p class="empty-hint" style="padding:40px;text-align:center;">请先选择练习内容</p>';
+      dotsContainer.innerHTML = '';
+      return;
+    }
+
     // 重置全局编号计数器
     globalWordIndex = 0;
 
-    // 渲染A4三段式练习纸
-    let html = '';
-
-    // 标题
+    // 生成所有内容HTML（不分页）
     const today = new Date();
     const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
-    html += `
-      <div class="preview-header">
-        <div class="preview-title">每日练习</div>
-        <div class="preview-date">${dateStr}</div>
-      </div>`;
 
-    // 语文听写区
+    // 构建各个section的HTML
+    const sections = [];
     if (chineseWords.length > 0) {
-      html += `
+      sections.push(`
         <div class="practice-section">
           <div class="section-title">【语文听写】</div>
           <div class="word-grid">
             ${chineseWords.map((w, i) => renderWordLine(w, i, 'chinese')).join('')}
           </div>
-        </div>`;
+        </div>`);
     }
-
-    // 英语听写区
     if (englishWords.length > 0) {
-      html += `
+      sections.push(`
         <div class="practice-section">
           <div class="section-title">【英语听写】</div>
           <div class="word-grid">
             ${englishWords.map((w, i) => renderWordLine(w, i, 'english')).join('')}
           </div>
-        </div>`;
+        </div>`);
     }
-
-    // 数学练习区
     if (mathWords.length > 0) {
-      html += `
+      sections.push(`
         <div class="practice-section math-section">
           <div class="section-title">【数学练习】</div>
           <div class="math-problems">
             ${mathWords.map((w, i) => renderMathProblem(w, i)).join('')}
           </div>
-        </div>`;
+        </div>`);
     }
 
-    if (!html) {
-      container.innerHTML = '<p class="empty-hint">请先选择练习内容</p>';
-      return;
+    const headerHtml = `
+      <div class="preview-header">
+        <div class="preview-title">每日练习</div>
+        <div class="preview-date">${dateStr}</div>
+      </div>`;
+
+    const allContentHtml = headerHtml + sections.join('');
+
+    // 分页逻辑：创建临时元素测量高度
+    const tempDiv = document.createElement('div');
+    tempDiv.style.cssText = 'position:absolute;left:-9999px;top:0;width:17.5cm;visibility:hidden;';
+    tempDiv.innerHTML = allContentHtml;
+    document.body.appendChild(tempDiv);
+
+    const pageContentHeight = 27 * 37.8 - 0.8 * 37.8 * 2 - 20; // A4高度 - 上下padding - 标题区
+    const headerEl = tempDiv.querySelector('.preview-header');
+    const headerHeight = headerEl ? headerEl.offsetHeight : 0;
+    const availableHeight = pageContentHeight - headerHeight;
+
+    // 收集所有section元素，按顺序分配到页面
+    const sectionEls = Array.from(tempDiv.querySelectorAll('.practice-section'));
+    const pages = [];
+    let currentPageHtml = '';
+    let currentHeight = 0;
+
+    // 第一页加标题
+    currentPageHtml = headerHtml;
+    currentHeight = headerHeight;
+
+    sectionEls.forEach(sectionEl => {
+      const sectionHeight = sectionEl.offsetHeight;
+      if (currentHeight + sectionHeight > pageContentHeight && currentPageHtml !== headerHtml) {
+        // 当前页放不下了，保存当前页，开始新页
+        pages.push(currentPageHtml);
+        currentPageHtml = '';
+        currentHeight = 0;
+      }
+      currentPageHtml += sectionEl.outerHTML;
+      currentHeight += sectionHeight;
+    });
+
+    // 最后一页
+    if (currentPageHtml) {
+      pages.push(currentPageHtml);
     }
 
-    container.innerHTML = html;
+    document.body.removeChild(tempDiv);
 
-    // 手机端自动缩放：让A4纸适配屏幕宽度
-    const scaler = $('preview-scaler');
-    const paper = container;
-    if (scaler && paper) {
-      const scalePaper = () => {
-        const containerWidth = scaler.clientWidth;
-        const paperWidth = 19.5 * 37.8; // 19.5cm → px (1cm ≈ 37.8px)
-        if (containerWidth < paperWidth) {
-          const scale = containerWidth / paperWidth;
-          paper.style.transform = `scale(${scale})`;
-          paper.style.transformOrigin = 'top left';
-          // 用原始高度（27cm）计算缩放后的容器高度
-          const paperHeight = 27 * 37.8; // 27cm → px
-          scaler.style.height = (paperHeight * scale) + 'px';
-        } else {
-          paper.style.transform = 'none';
-          scaler.style.height = '';
-        }
-      };
-      scalePaper();
-      window.addEventListener('resize', scalePaper);
+    // 如果没有分页成功（测量可能不准确），至少保证有一页
+    if (pages.length === 0) {
+      pages.push(allContentHtml);
     }
+
+    // 渲染多张A4纸
+    pager.innerHTML = pages.map((pageHtml, i) =>
+      `<div class="preview-page" id="preview-page-${i}">${pageHtml}</div>`
+    ).join('');
+
+    // 渲染翻页指示器
+    dotsContainer.innerHTML = pages.map((_, i) =>
+      `<div class="preview-dot${i === 0 ? ' active' : ''}" data-page="${i}"></div>`
+    ).join('');
+
+    // 手机端缩放每张纸
+    const scalePages = () => {
+      const containerWidth = pager.clientWidth;
+      const paperWidth = 19.5 * 37.8;
+      const scale = containerWidth < paperWidth ? containerWidth / paperWidth : 1;
+      const gap = 12;
+      const pageElWidth = paperWidth * scale;
+
+      document.querySelectorAll('.preview-page').forEach(page => {
+        page.style.transform = `scale(${scale})`;
+        page.style.transformOrigin = 'top left';
+        // 缩放后实际占用的宽度
+        page.style.width = (19.5 * 37.8) + 'px';
+        page.style.height = (27 * 37.8) + 'px';
+        // 用margin-right模拟gap（因为缩放后gap也会变小）
+        page.style.marginRight = (gap / scale) + 'px';
+      });
+
+      // 设置每张纸的包裹容器高度
+      const paperHeight = 27 * 37.8 * scale;
+      pager.style.alignItems = 'flex-start';
+      pager.style.paddingTop = '8px';
+      pager.style.height = (paperHeight + 16) + 'px';
+    };
+    scalePages();
+    window.addEventListener('resize', scalePages);
+
+    // 滑动时更新指示器
+    pager.addEventListener('scroll', () => {
+      const scrollLeft = pager.scrollLeft;
+      const pageWidth = pager.querySelector('.preview-page')?.offsetWidth || 1;
+      const gap = 12;
+      const currentPage = Math.round(scrollLeft / (pageWidth * (pager.clientWidth < 19.5 * 37.8 ? pager.clientWidth / (19.5 * 37.8) : 1) + gap));
+      document.querySelectorAll('.preview-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === Math.min(currentPage, pages.length - 1));
+      });
+    });
   };
 
   // 全局编号计数器
